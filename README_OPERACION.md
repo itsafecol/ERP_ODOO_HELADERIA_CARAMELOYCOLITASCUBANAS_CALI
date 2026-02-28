@@ -36,6 +36,19 @@ Operacion segura de la instancia `ODOOVER18_PROYECTO_HDCARAMELO` con ambientes P
 - Ejecutar backup inmediato:
   - `docker exec backuphdcaramelover18 /bin/bash /backup/scripts/backup_all.sh`
 
+## Operacion por archivo (recomendado por ambiente)
+- Produccion:
+  - `docker compose -f docker-compose.prod.yml up -d`
+  - `docker compose -f docker-compose.prod.yml down`
+- UAT:
+  - `docker compose -f docker-compose.uat.yml up -d`
+  - `docker compose -f docker-compose.uat.yml down`
+- STAGING:
+  - `docker compose -f docker-compose.staging.yml up -d`
+  - `docker compose -f docker-compose.staging.yml down`
+
+Nota: no ejecutes simultaneamente estos archivos separados si comparten los mismos `container_name`. Para operacion simultanea de los tres ambientes, usa `docker-compose.yml` (archivo completo).
+
 ## Politica de Cambios
 - Desarrollo nuevo -> STAGING
 - Validacion funcional -> UAT

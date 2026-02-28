@@ -26,6 +26,10 @@ services:
         condition: service_healthy
     env_file:
       - ./odoo/.env.dev
+    environment:
+      HOST: postgres
+      USER: heladeriadb
+      PASSWORD: heladeriadb
     command: ["odoo", "-c", "/etc/odoo/odoo_prod.conf"]
     ports:
       - "8006:8069"
@@ -47,6 +51,10 @@ services:
         condition: service_healthy
     env_file:
       - ./odoo/.env.dev
+    environment:
+      HOST: postgres
+      USER: heladeriadb
+      PASSWORD: heladeriadb
     command: ["odoo", "-c", "/etc/odoo/odoo_uat.conf"]
     ports:
       - "127.0.0.1:8016:8069"
@@ -68,6 +76,10 @@ services:
         condition: service_healthy
     env_file:
       - ./odoo/.env.dev
+    environment:
+      HOST: postgres
+      USER: heladeriadb
+      PASSWORD: heladeriadb
     command: ["odoo", "-c", "/etc/odoo/odoo_staging.conf"]
     ports:
       - "127.0.0.1:18006:8069"

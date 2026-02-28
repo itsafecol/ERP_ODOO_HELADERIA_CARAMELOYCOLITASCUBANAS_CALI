@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgresqlhdcaramelover18
+    restart: unless-stopped
+    env_file:
+      - ./postgresql/.env.dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./vol_postgres_proyectohdcaramelo:/var/lib/postgresql/data
+    networks:
+      - hdcaramelo-net
+
+  odoo_uat:
+    build:
+      context: ./odoo
+      dockerfile: Dockerfile
+    container_name: odoohdcaramelo_uat_ver18
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./odoo/.env.dev
+    environment:
+      HOST: postgres
+      USER: heladeriadb
+      PASSWORD: heladeriadb
+    command: ["odoo", "-c", "/etc/odoo/odoo_uat.conf"]
+    ports:
+      - "127.0.0.1:8016:8069"
+    volumes:
+      - ./vol_odoo18_uat_proyectohdcaramelo:/var/lib/odoo
+      - ./odoo/extra-addons:/mnt/extra-addons:ro
+      - ./odoo/config_secure/odoo_uat.conf:/etc/odoo/odoo_uat.conf:ro
+    networks:
+      - hdcaramelo-net
+
+networks:
+  hdcaramelo-net:
+    driver: bridge

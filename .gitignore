@@ -1,0 +1,25 @@
+# Runtime data and persistent volumes
+vol_*/
+vol*/
+data/
+letsencrypt/
+logs/
+
+# Backup artifacts
+vol_backup_postgresql_hdcaramelo/
+*.sql
+*.dump
+
+# Sensitive keys/secrets
+migraciones/keys/id_*
+*.pem
+*.key
+
+# Python/cache/editor
+__pycache__/
+*.pyc
+*.pyo
+*.swp
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,122 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgresqlhdcaramelover18
+    restart: unless-stopped
+    env_file:
+      - ./postgresql/.env.dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./vol_postgres_proyectohdcaramelo:/var/lib/postgresql/data
+    networks:
+      - hdcaramelo-net
+
+  odoo_prod:
+    build:
+      context: ./odoo
+      dockerfile: Dockerfile
+    container_name: odoohdcaramelover18
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./odoo/.env.dev
+    command: ["odoo", "-c", "/etc/odoo/odoo_prod.conf"]
+    ports:
+      - "8006:8069"
+    volumes:
+      - ./vol_odoo18_proyectohdcaramelo:/var/lib/odoo
+      - ./odoo/extra-addons:/mnt/extra-addons:ro
+      - ./odoo/config_secure/odoo_prod.conf:/etc/odoo/odoo_prod.conf:ro
+    networks:
+      - hdcaramelo-net
+
+  odoo_uat:
+    build:
+      context: ./odoo
+      dockerfile: Dockerfile
+    container_name: odoohdcaramelo_uat_ver18
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./odoo/.env.dev
+    command: ["odoo", "-c", "/etc/odoo/odoo_uat.conf"]
+    ports:
+      - "127.0.0.1:8016:8069"
+    volumes:
+      - ./vol_odoo18_uat_proyectohdcaramelo:/var/lib/odoo
+      - ./odoo/extra-addons:/mnt/extra-addons:ro
+      - ./odoo/config_secure/odoo_uat.conf:/etc/odoo/odoo_uat.conf:ro
+    networks:
+      - hdcaramelo-net
+
+  odoo_staging:
+    build:
+      context: ./odoo
+      dockerfile: Dockerfile
+    container_name: odoohdcaramelo_staging_ver18
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./odoo/.env.dev
+    command: ["odoo", "-c", "/etc/odoo/odoo_staging.conf"]
+    ports:
+      - "127.0.0.1:18006:8069"
+    volumes:
+      - ./vol_odoo18_staging_proyectohdcaramelo:/var/lib/odoo
+      - ./odoo/extra-addons:/mnt/extra-addons:ro
+      - ./odoo/config_secure/odoo_staging.conf:/etc/odoo/odoo_staging.conf:ro
+    networks:
+      - hdcaramelo-net
+
+  pgadmin:
+    image: dpage/pgadmin4:9.12
+    container_name: pgadminhdcaramelover18
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_started
+    ports:
+      - "127.0.0.1:5002:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: jsmontoya@itsafe.com.co
+      PGADMIN_DEFAULT_PASSWORD: admindb_caramelo
+    volumes:
+      - ./vol_pgadmin_proyectohdcaramelo:/var/lib/pgadmin
+    networks:
+      - hdcaramelo-net
+
+  backup:
+    image: postgres:17
+    container_name: backuphdcaramelover18
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ./postgresql/.env.dev
+    environment:
+      PGHOST: postgres
+      PGPORT: "5432"
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      TZ: America/Bogota
+    command: ["/bin/bash", "/backup/scripts/run_scheduler.sh"]
+    volumes:
+      - ./backup/scripts:/backup/scripts:ro
+      - ./vol_backup_postgresql_hdcaramelo:/backup/output
+    networks:
+      - hdcaramelo-net
+
+networks:
+  hdcaramelo-net:
+    driver: bridge
